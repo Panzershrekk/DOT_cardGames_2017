@@ -7,15 +7,27 @@ namespace CoincheServer
 {
     class PokerManager
     {
+        //SETUP
+
         private static Random rng = new Random();
         private List<Card> _deck;
+        private List<Card> _board;
+        private List<Player> _players;
         private bool _isGameStarted;
         private int _player;
+        private bool _gameIsSetup;
+
+        //GAME
+        private int _lilBlind;
+        private int _bigBlind;
+        private int _turn;
+        private int _currentlyPlaying;
 
         public PokerManager()
         {
             this._player = 0;
             this._isGameStarted = false;
+            this._players = new List<Player>();
             this._deck = new List<Card>();
             this._deck.Add(new Card('S', '1', 13));
             this._deck.Add(new Card('S', '2', 1));
@@ -73,8 +85,16 @@ namespace CoincheServer
             this._deck.Add(new Card('C', 'Q', 11));
             this._deck.Add(new Card('C', 'K', 12));
 
-
+            this._board = new List<Card>();
+            this._gameIsSetup = false;
             Shuffle(this._deck);
+
+            //SETUP IS OVER
+
+            this._lilBlind = 5;
+            this._bigBlind = 10;
+            this._turn = 1;
+            this._currentlyPlaying = 1;
         }
 
         public static void Shuffle<T>(IList<T> list)
@@ -90,9 +110,47 @@ namespace CoincheServer
             }
         }
 
-        public void launchPoker()
+        public void SetupGame()
         {
-            printDeck();
+            int i = 0;
+            int j = 1;
+            int tmp = 0;
+
+            while (i != 5)
+            {
+                this._board.Add(new Card(this._deck[i].Type, this._deck[i].Number, this._deck[i].Power));
+                i++;
+            }
+            while (j <= this.Player)
+            {
+                tmp = i + 2;
+                while (i != tmp)
+                {
+                    this._players[j - 1]
+                        .addCard(new Card(this._deck[i].Type, this._deck[i].Number, this._deck[i].Power));
+                    i++;
+                }
+                j++;
+            }
+
+
+            foreach (Card c in this._board)
+            {
+                Console.WriteLine(c.Type + " " + c.Number);
+            }
+            this._gameIsSetup = true;
+        }
+
+        public string launchPoker(string msg, string channelId)
+        {
+            if (this._gameIsSetup == false)
+                SetupGame();
+            if (string.Equals(msg, "BOARD"))
+                return (AffBoard());
+            if (string.Equals(msg, "HAND"))
+                return AffPlayerHand(channelId);
+            Console.WriteLine(msg);
+            return ("INFO: THE GAME IS HERE\r\n");
         }
 
         public void printDeck()
@@ -101,6 +159,37 @@ namespace CoincheServer
             {
                 Console.WriteLine(c.Type + " " + c.Number);
             }
+        }
+
+
+        public string AffPlayerHand(string channelId)
+        {
+            string hand = "";
+
+            foreach (Player p in this._players)
+            {
+                if (string.Equals(p.ChannelId, channelId))
+                    hand += p.retHand();
+            }
+            return ("INFO: " + hand + "\r\n");
+        }
+
+        public string AffBoard()
+        {
+            string boardInfo = "";
+            int i = 0;
+
+            while (i != (2 + this._turn))
+            {
+                boardInfo += this._board[i].Type.ToString() + this._board[i].Number.ToString() + " ";
+                i++;
+            }
+            return ("INFO: " + boardInfo + "\r\n");
+        }
+
+        public int nextPlayer()
+        {
+            return (1);
         }
 
         public bool IsGameStarted
@@ -112,7 +201,12 @@ namespace CoincheServer
         public int Player
         {
             get { return _player; }
-            set { _player = value; }
+            set {_player = value;}
+        }
+
+        public void AddPlayer(int pn, string chanId)
+        {
+            this._players.Add(new Player(pn, chanId));
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace CoincheServer
+﻿using System.Text.RegularExpressions;
+
+namespace CoincheServer
 {
     using System;
     using System.Net;
@@ -40,11 +42,12 @@
             }
             g.Add(contex.Channel);
             poker.Player += 1;
+            poker.AddPlayer(poker.Player, contex.Channel.RemoteAddress.ToString());
             //contex.WriteAndFlushAsync(g.Count);
             if (poker.Player == 2)
             {
-                contex.WriteAndFlushAsync(string.Format("Welcome to the game secure chat server!\n"));
-                group.WriteAndFlushAsync("Vilcome to the game\n", new EveryOneBut(contex.Channel.Id));
+                contex.WriteAndFlushAsync(string.Format("Welcome to the game!\n"));
+                group.WriteAndFlushAsync("Welcome to the game\n", new EveryOneBut(contex.Channel.Id));
                 poker.IsGameStarted = true;
             }
             Console.WriteLine(poker.Player);
@@ -72,9 +75,8 @@
             }
             else
             {
-                group.WriteAndFlushAsync(broadcast, new EveryOneBut(contex.Channel.Id));
-                poker.launchPoker();
-                response = "";
+                //group.WriteAndFlushAsync(broadcast, new EveryOneBut(contex.Channel.Id));
+                response = poker.launchPoker(msg.Trim().ToUpper(), contex.Channel.RemoteAddress.ToString());
             }
 
             Task wait_close = contex.WriteAndFlushAsync(response);
