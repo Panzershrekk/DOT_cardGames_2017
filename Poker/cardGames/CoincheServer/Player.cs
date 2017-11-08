@@ -12,7 +12,7 @@ namespace CoincheServer
             this.PlayerNbr = pn;
             this.ChannelId = channel;
             this.Hand = new List<Card>();
-            this.Coin = 400;
+            this.Coin = 1500;
             this.HasPassed = false;
         }
 
@@ -29,6 +29,11 @@ namespace CoincheServer
         public void AddCard(Card c)
         {
            this.Hand.Add(c);
+        }
+
+        public void ClearHand()
+        {
+            this.Hand.Clear();
         }
 
         public string RetHand()

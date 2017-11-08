@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using DotNetty.Common.Internal.Logging;
+using DotNetty.Common.Utilities;
 
 namespace CoincheServer
 {
@@ -90,7 +91,6 @@ namespace CoincheServer
 
             this._board = new List<Card>();
             this._gameIsSetup = false;
-            Shuffle(this._deck);
 
             //SETUP IS OVER
 
@@ -121,6 +121,7 @@ namespace CoincheServer
             var i = 0;
             var j = 1;
 
+            Shuffle(this._deck);
             while (i != 5)
             {
                 this._board.Add(new Card(this._deck[i].Type, this._deck[i].Number, this._deck[i].Power));
@@ -133,6 +134,7 @@ namespace CoincheServer
                 tmp = i + 2;
                 while (i != tmp)
                 {
+                    this._players[j - 1].ClearHand();
                     this._players[j - 1]
                         .AddCard(new Card(this._deck[i].Type, this._deck[i].Number, this._deck[i].Power));
                     i++;
@@ -145,7 +147,7 @@ namespace CoincheServer
             this._gameIsSetup = true;
         }
 
-        public string launchPoker(string msg, string channelId)
+        public string LaunchPoker(string msg, string channelId)
         {
             if (this._gameIsSetup == false)
                 SetupGame();
@@ -175,7 +177,7 @@ namespace CoincheServer
                     }
                     return ("ACTION: Player " + current + " passed\r\n");
                 }
-                if (msg.StartsWith("BET") && msg.Length <= 8)
+                if (msg.StartsWith("BET") && msg.Length >= 4 &&  msg.Length <= 8)
                     return (CheckBet(msg, channelId));
             }
             else
@@ -217,10 +219,17 @@ namespace CoincheServer
                 {
                     this._turn += 1;
                     this._played = 0;
-                    return ("ACTION: Player " + current + " bet value" + betValue + ". Starting turn" + this._turn +
+                    if (this._turn > 3)
+                    {
+                        this._turn = 1;
+                        SetupGame();
+                        return ("ACTION: Player " + current + " bet value " + betValue + "\n" + CheckWinner() + "\nNew round juste started" + "\r\n");
+                    }
+
+                    return ("ACTION: Player " + current + " bet value " + betValue + ". Starting turn" + this._turn +
                             "\r\n");
                 }
-                return ("ACTION: Player " + current + " bet value" + betValue + "\r\n");
+                return ("ACTION: Player " + current + " bet value " + betValue + "\r\n");
             }
             return ("INFO: Your bet is invalid\r\n");
         }
@@ -298,10 +307,33 @@ namespace CoincheServer
             }
         }
 
-        /*public int CheckWinner()
+        public string CheckWinner()
         {
-            
-        }*/
+            var comb = new Combination();
+            var currentWinner = 1;
+            var maxpower = 0;
+            Player winner = null;
+
+            foreach (var p in this._players)
+            {
+                if (p.HasPassed == false)
+                {
+                    var power = 0;
+                    power = comb.CheckAllComb(this._board, p.Hand);
+
+                    if (power > 0 && maxpower < power)
+                    {
+
+                        maxpower = power;
+                        currentWinner = p.PlayerNbr;
+                        winner = p;
+                    }
+                }
+                    
+            }
+            winner.Coin += this._coinOnBoard;
+            return ("And the winner for " + this._coinOnBoard + " is player " + currentWinner + "\r\n");
+        }
 
         public Player GetPlayerById(string chanId)
         {

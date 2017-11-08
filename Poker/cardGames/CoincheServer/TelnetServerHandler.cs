@@ -76,7 +76,9 @@ namespace CoincheServer
             else
             {
                 //group.WriteAndFlushAsync(broadcast, new EveryOneBut(contex.Channel.Id));
-                response = poker.launchPoker(msg.Trim().ToUpper(), contex.Channel.RemoteAddress.ToString());
+                response = poker.LaunchPoker(msg.Trim().ToUpper(), contex.Channel.RemoteAddress.ToString());
+                if (response.StartsWith("ACTION:"))
+                    group.WriteAndFlushAsync(response, new EveryOneBut(contex.Channel.Id));
             }
 
             Task wait_close = contex.WriteAndFlushAsync(response);
