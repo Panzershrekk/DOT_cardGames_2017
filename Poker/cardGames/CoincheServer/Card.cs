@@ -6,33 +6,18 @@ namespace CoincheServer
 {
     class Card
     {
-        private char _type;
-        private char _number;
-        private int _power;
-
         public Card(char t, char n, int p)
         {
-            this._type = t;
-            this._number = n;
-            this._power = p;
+            this.Type = t;
+            this.Number = n;
+            this.Power = p;
         }
 
-        public char Type
-        {
-            get { return _type; }
-            set { _type = value; }
-        }
+        public char Type { get; set; }
 
-        public char Number
-        {
-            get { return _number; }
-            set { _number = value; }
-        }
+        public char Number { get; set; }
 
-        public int Power
-        {
-            get { return _power; }
-            set { _power = value; }
-        }
+        public int Power { get; set; }
+
     }
 }

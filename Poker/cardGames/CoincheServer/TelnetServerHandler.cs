@@ -44,7 +44,7 @@ namespace CoincheServer
             poker.Player += 1;
             poker.AddPlayer(poker.Player, contex.Channel.RemoteAddress.ToString());
             //contex.WriteAndFlushAsync(g.Count);
-            if (poker.Player == 2)
+            if (poker.Player == 4)
             {
                 contex.WriteAndFlushAsync(string.Format("Welcome to the game!\n"));
                 group.WriteAndFlushAsync("Welcome to the game\n", new EveryOneBut(contex.Channel.Id));

@@ -1,69 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CoincheServer
 {
     class Player
     {
-        private int _playerNbr;
-        private string _channelId;
-        private List<Card> _hand;
-        private int _coin;
-        private bool _hasPassed;
-
         public Player(int pn, string channel)
         {
-            this._playerNbr = pn;
-            this._channelId = channel;
-            this._hand = new List<Card>();
-            this._coin = 400;
-            this._hasPassed = false;
+            this.PlayerNbr = pn;
+            this.ChannelId = channel;
+            this.Hand = new List<Card>();
+            this.Coin = 400;
+            this.HasPassed = false;
         }
 
-        public int Coin
+        public int Coin { get; set; }
+
+        public int PlayerNbr { get; set; }
+
+        public string ChannelId { get; set; }
+
+        public List<Card> Hand { get; set; }
+
+        public bool HasPassed { get; set; }
+
+        public void AddCard(Card c)
         {
-            get { return _coin; }
-            set { _coin = value; }
+           this.Hand.Add(c);
         }
 
-        public int PlayerNbr
+        public string RetHand()
         {
-            get { return _playerNbr; }
-            set { _playerNbr = value; }
-        }
+            var cards = this.Hand.Aggregate("", (current, c) => current + (c.Type.ToString() + c.Number.ToString() + " "));
 
-        public string ChannelId
-        {
-            get { return _channelId; }
-            set { _channelId = value; }
-        }
-
-        public List<Card> Hand
-        {
-            get { return _hand; }
-            set { _hand = value; }
-        }
-
-        public bool HasPassed
-        {
-            get { return _hasPassed; }
-            set { _hasPassed = value; }
-        }
-
-        public void addCard(Card c)
-        {
-           this._hand.Add(c);
-        }
-
-        public string retHand()
-        {
-            string cards = "";
-
-            foreach (Card c in this._hand)
-            {
-                cards += (c.Type.ToString() + c.Number.ToString() + " ");
-            }
             return (cards);
         }
     }

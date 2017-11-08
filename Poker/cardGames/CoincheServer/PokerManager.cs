@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
+using DotNetty.Common.Internal.Logging;
 
 namespace CoincheServer
 {
@@ -9,24 +11,25 @@ namespace CoincheServer
     {
         //SETUP
 
-        private static Random rng = new Random();
+        private static Random _rng = new Random();
         private List<Card> _deck;
         private List<Card> _board;
         private List<Player> _players;
-        private bool _isGameStarted;
-        private int _player;
         private bool _gameIsSetup;
 
         //GAME
         private int _lilBlind;
         private int _bigBlind;
         private int _turn;
+        private int _played;
         private int _currentlyPlaying;
+        private int _coinOnBoard;
+        private int _maxBet;
 
         public PokerManager()
         {
-            this._player = 0;
-            this._isGameStarted = false;
+            this.Player = 0;
+            this.IsGameStarted = false;
             this._players = new List<Player>();
             this._deck = new List<Card>();
             this._deck.Add(new Card('S', '1', 13));
@@ -94,17 +97,20 @@ namespace CoincheServer
             this._lilBlind = 5;
             this._bigBlind = 10;
             this._turn = 1;
+            this._played = 0;
             this._currentlyPlaying = 1;
+            this._coinOnBoard = 0;
+            this._maxBet = 10;
         }
 
         public static void Shuffle<T>(IList<T> list)
         {
-            int n = list.Count;
+            var n = list.Count;
             while (n > 1)
             {
                 n--;
-                int k = rng.Next(n + 1);
-                T value = list[k];
+                var k = _rng.Next(n + 1);
+                var value = list[k];
                 list[k] = list[n];
                 list[n] = value;
             }
@@ -112,9 +118,8 @@ namespace CoincheServer
 
         public void SetupGame()
         {
-            int i = 0;
-            int j = 1;
-            int tmp = 0;
+            var i = 0;
+            var j = 1;
 
             while (i != 5)
             {
@@ -123,21 +128,20 @@ namespace CoincheServer
             }
             while (j <= this.Player)
             {
+                var tmp = 0;
+
                 tmp = i + 2;
                 while (i != tmp)
                 {
                     this._players[j - 1]
-                        .addCard(new Card(this._deck[i].Type, this._deck[i].Number, this._deck[i].Power));
+                        .AddCard(new Card(this._deck[i].Type, this._deck[i].Number, this._deck[i].Power));
                     i++;
                 }
                 j++;
             }
-
-
-            foreach (Card c in this._board)
-            {
-                Console.WriteLine(c.Type + " " + c.Number);
-            }
+            this._players[_currentlyPlaying - 1].Coin -= 5;
+            this._players[NextPlayer() - 1].Coin -= 10;
+            this._coinOnBoard += 15;
             this._gameIsSetup = true;
         }
 
@@ -149,35 +153,108 @@ namespace CoincheServer
                 return (AffBoard());
             if (string.Equals(msg, "HAND"))
                 return AffPlayerHand(channelId);
-            Console.WriteLine(msg);
+            if (string.Equals(msg, "COIN"))
+                return (AffCoin(channelId));
+            if (string.Equals(msg, "MAXBET"))
+                return (AffMaxBet());
+            if (string.Equals(msg, "COINBOARD"))
+                return (AffCoinOnBoard());
+            if (CurrentPlayerIsGood(channelId) == true)
+            {
+                if (string.Equals(msg, "PASS"))
+                {
+                    var current = this._currentlyPlaying;
+
+                    this._players[this._currentlyPlaying - 1].HasPassed = true;
+                    RotatePlayer();
+                    if (this._played == PlayerInGame())
+                    {
+                        this._played = 0;
+                        this._turn += 1;
+                        return ("ACTION: Player " + current + " passed. Starting turn " + this._turn + "\r\n");
+                    }
+                    return ("ACTION: Player " + current + " passed\r\n");
+                }
+                if (msg.StartsWith("BET") && msg.Length <= 8)
+                    return (CheckBet(msg, channelId));
+            }
+            else
+                return ("INFO: Sorry this is not your turn player " + this._currentlyPlaying +
+                        " is currently playing\r\n");
             return ("INFO: THE GAME IS HERE\r\n");
         }
 
-        public void printDeck()
+        public string AffMaxBet()
         {
-            foreach (Card c in this._deck)
+            return ("INFO: The current maximum bet is " + this._maxBet + "\r\n");
+        }
+
+        public string AffCoinOnBoard()
+        {
+            return ("INFO: The number of coin on board is " + this._coinOnBoard + "\r\n");
+        }
+
+        public string CheckBet(string msg, string chanId)
+        {
+            var i = 4;
+            var betValue = "";
+
+            while (i != msg.Length)
+            {
+                betValue += msg[i];
+                i++;
+            }
+            if (int.Parse(betValue) >= _maxBet && GetPlayerById(chanId).Coin >= int.Parse((betValue)))
+            {
+                var current = this._currentlyPlaying;
+
+                GetPlayerById(chanId).Coin -= int.Parse(betValue);
+                this._coinOnBoard += int.Parse(betValue);
+                this._maxBet = int.Parse(betValue);
+                RotatePlayer();
+                this._played += 1;
+                if (this._played == PlayerInGame())
+                {
+                    this._turn += 1;
+                    this._played = 0;
+                    return ("ACTION: Player " + current + " bet value" + betValue + ". Starting turn" + this._turn +
+                            "\r\n");
+                }
+                return ("ACTION: Player " + current + " bet value" + betValue + "\r\n");
+            }
+            return ("INFO: Your bet is invalid\r\n");
+        }
+
+        public void PrintDeck()
+        {
+            foreach (var c in this._deck)
             {
                 Console.WriteLine(c.Type + " " + c.Number);
             }
         }
 
-
         public string AffPlayerHand(string channelId)
         {
-            string hand = "";
+            var hand = "";
 
-            foreach (Player p in this._players)
+            foreach (var p in this._players)
             {
                 if (string.Equals(p.ChannelId, channelId))
-                    hand += p.retHand();
+                    hand += p.RetHand();
             }
             return ("INFO: " + hand + "\r\n");
         }
 
+        public string AffCoin(string channelId)
+        {
+            var coin = this._players.Where(p => string.Equals(p.ChannelId, channelId)).Aggregate("", (current, p) => current + p.Coin);
+            return ("INFO: " + coin + "\r\n");
+        }
+
         public string AffBoard()
         {
-            string boardInfo = "";
-            int i = 0;
+            var boardInfo = "";
+            var i = 0;
 
             while (i != (2 + this._turn))
             {
@@ -187,22 +264,70 @@ namespace CoincheServer
             return ("INFO: " + boardInfo + "\r\n");
         }
 
-        public int nextPlayer()
+        public int NextPlayer()
         {
-            return (1);
+            if (this._currentlyPlaying + 1 == this.Player)
+                return (1);
+            return (this._currentlyPlaying + 1);
         }
 
-        public bool IsGameStarted
+        public bool CurrentPlayerIsGood(string chanId)
         {
-            get { return _isGameStarted; }
-            set { _isGameStarted = value; }
+            foreach (var p in this._players)
+            {
+                if (p.PlayerNbr == this._currentlyPlaying && string.Equals(p.ChannelId, chanId))
+                    return (true);
+            }
+            return (false);
         }
 
-        public int Player
+        public void RotatePlayer()
         {
-            get { return _player; }
-            set {_player = value;}
+            if (this._currentlyPlaying == this._players.Count)
+                this._currentlyPlaying = 1;
+            else
+                this._currentlyPlaying++;
+
+            if (this._players[this._currentlyPlaying - 1].HasPassed != true) return;
+            while (this._players[this._currentlyPlaying - 1].HasPassed == true)
+            {
+                if (this._currentlyPlaying == this._players.Count)
+                    this._currentlyPlaying = 1;
+                else
+                    this._currentlyPlaying++;
+            }
         }
+
+        /*public int CheckWinner()
+        {
+            
+        }*/
+
+        public Player GetPlayerById(string chanId)
+        {
+            foreach (var p in this._players)
+            {
+                if (p.ChannelId.Equals(chanId))
+                    return (p);
+            }
+            return (null);
+        }
+
+        public int PlayerInGame()
+        {
+            int i = 0;
+
+            foreach (var p in this._players)
+            {
+                if (p.HasPassed == false)
+                    i++;
+            }
+            return (i);
+        }
+
+        public bool IsGameStarted { get; set; }
+
+        public int Player { get; set; }
 
         public void AddPlayer(int pn, string chanId)
         {
