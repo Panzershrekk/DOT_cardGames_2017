@@ -19,5 +19,10 @@ namespace CoincheServer
 
         public int Power { get; set; }
 
+        public void Info()
+        {
+            Console.WriteLine("Power: " + Power + " Type: " + Type + " Number: " + Number);
+        }
+
     }
 }
