@@ -122,6 +122,7 @@ namespace CoincheServer
             var j = 1;
 
             Shuffle(this._deck);
+            this._board.Clear();
             while (i != 5)
             {
                 this._board.Add(new Card(this._deck[i].Type, this._deck[i].Number, this._deck[i].Power));
@@ -132,15 +133,19 @@ namespace CoincheServer
                 var tmp = 0;
 
                 tmp = i + 2;
+                this._players[j - 1].ClearHand();
                 while (i != tmp)
                 {
-                    this._players[j - 1].ClearHand();
                     this._players[j - 1]
                         .AddCard(new Card(this._deck[i].Type, this._deck[i].Number, this._deck[i].Power));
                     i++;
                 }
                 j++;
             }
+            ResetPlayer();
+            this._coinOnBoard = 0;
+            this._maxBet = 10;
+            this._currentlyPlaying = 1;
             this._players[_currentlyPlaying - 1].Coin -= 5;
             this._players[NextPlayer() - 1].Coin -= 10;
             this._coinOnBoard += 15;
@@ -169,10 +174,28 @@ namespace CoincheServer
 
                     this._players[this._currentlyPlaying - 1].HasPassed = true;
                     RotatePlayer();
+                    if (PlayerInGame() == 1)
+                    {
+                        this._played = 0;
+                        this._turn += 1;
+                        var winner = CheckLastPlayer();
+                        this._turn = 1;
+                        SetupGame();
+                        return ("ACTION: Player " + current + " passed " + "\n" + winner +
+                                "\nNew round just started" + "\r\n");
+                    }
                     if (this._played == PlayerInGame())
                     {
                         this._played = 0;
                         this._turn += 1;
+                        if (this._turn > 3)
+                        {
+                            var winner = CheckWinner();
+                            this._turn = 1;
+                            SetupGame();
+                            return ("ACTION: Player " + current + " passed " + "\n" + winner +
+                                    "\nNew round just started" + "\r\n");
+                        }
                         return ("ACTION: Player " + current + " passed. Starting turn " + this._turn + "\r\n");
                     }
                     return ("ACTION: Player " + current + " passed\r\n");
@@ -186,15 +209,7 @@ namespace CoincheServer
             return ("INFO: THE GAME IS HERE\r\n");
         }
 
-        public string AffMaxBet()
-        {
-            return ("INFO: The current maximum bet is " + this._maxBet + "\r\n");
-        }
-
-        public string AffCoinOnBoard()
-        {
-            return ("INFO: The number of coin on board is " + this._coinOnBoard + "\r\n");
-        }
+        
 
         public string CheckBet(string msg, string chanId)
         {
@@ -203,6 +218,8 @@ namespace CoincheServer
 
             while (i != msg.Length)
             {
+                if (char.IsDigit(msg[i]) == false)
+                    return ("INFO: Your bet is invalid\r\n");
                 betValue += msg[i];
                 i++;
             }
@@ -221,12 +238,13 @@ namespace CoincheServer
                     this._played = 0;
                     if (this._turn > 3)
                     {
+                        var winner = CheckWinner();
                         this._turn = 1;
                         SetupGame();
-                        return ("ACTION: Player " + current + " bet value " + betValue + "\n" + CheckWinner() + "\nNew round juste started" + "\r\n");
+                        return ("ACTION: Player " + current + " bet value " + betValue + "\n" + winner + "\nNew round just started" + "\r\n");
                     }
 
-                    return ("ACTION: Player " + current + " bet value " + betValue + ". Starting turn" + this._turn +
+                    return ("ACTION: Player " + current + " bet value " + betValue + ". Starting turn " + this._turn +
                             "\r\n");
                 }
                 return ("ACTION: Player " + current + " bet value " + betValue + "\r\n");
@@ -297,8 +315,8 @@ namespace CoincheServer
             else
                 this._currentlyPlaying++;
 
-            if (this._players[this._currentlyPlaying - 1].HasPassed != true) return;
-            while (this._players[this._currentlyPlaying - 1].HasPassed == true)
+            if (this._players[this._currentlyPlaying - 1].HasPassed != true  && this._players[this._currentlyPlaying - 1].HasPassed == true) return;
+            while (this._players[this._currentlyPlaying - 1].HasPassed == true || this._players[this._currentlyPlaying - 1].Lost == true)
             {
                 if (this._currentlyPlaying == this._players.Count)
                     this._currentlyPlaying = 1;
@@ -321,7 +339,7 @@ namespace CoincheServer
                     var power = 0;
                     power = comb.CheckAllComb(this._board, p.Hand);
 
-                    if (power > 0 && maxpower < power)
+                    if (power >= 0 && maxpower <= power)
                     {
 
                         maxpower = power;
@@ -357,6 +375,34 @@ namespace CoincheServer
             return (i);
         }
 
+        public void ResetPlayer()
+        {
+            foreach (var p in this._players)
+            {
+                p.HasPassed = false;
+            }
+        }
+
+        public int CheckLastPlayer()
+        {
+            foreach (var p in this._players)
+            {
+                if (p.HasPassed == false && p.HasPassed == false)
+                    return (p.PlayerNbr);
+            }
+            return (0);
+        }
+
+        public string AffMaxBet()
+        {
+            return ("INFO: The current maximum bet is " + this._maxBet + "\r\n");
+        }
+
+        public string AffCoinOnBoard()
+        {
+            return ("INFO: The number of coin on board is " + this._coinOnBoard + "\r\n");
+        }
+
         public bool IsGameStarted { get; set; }
 
         public int Player { get; set; }
@@ -365,5 +411,6 @@ namespace CoincheServer
         {
             this._players.Add(new Player(pn, chanId));
         }
+
     }
 }

@@ -14,6 +14,7 @@ namespace CoincheServer
             this.Hand = new List<Card>();
             this.Coin = 1500;
             this.HasPassed = false;
+            this.Lost = false;
         }
 
         public int Coin { get; set; }
@@ -25,6 +26,9 @@ namespace CoincheServer
         public List<Card> Hand { get; set; }
 
         public bool HasPassed { get; set; }
+
+        public bool Lost { get; set; }
+
 
         public void AddCard(Card c)
         {

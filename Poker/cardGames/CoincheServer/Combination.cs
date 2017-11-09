@@ -16,10 +16,11 @@ namespace CoincheServer
 
         public int CheckAllComb(List<Card> board, List<Card> playerHand)
         {
-            if (CheckFourOfAKind(board, playerHand) != 0)
+            Power = 0;
+            /*if (CheckFourOfAKind(board, playerHand) != 0)
                 return (7);
             if (CheckThreeOfAKind(board, playerHand) != 0)
-                return (3);
+                return (3);*/
             if (CheckPair(board, playerHand) != 0)
                 return (1);
             return (0);
@@ -36,8 +37,9 @@ namespace CoincheServer
                 {
                     if (firstcard.Number != secondcard.Number || firstcard.Type != secondcard.Type)
                     {
-                        if (firstcard.Number.Equals(secondcard.Number))
+                        if (firstcard.Number == secondcard.Number)
                         {
+                            Console.WriteLine(firstcard.Power.ToString() + firstcard.Number.ToString() + firstcard.Type.ToString());
                             if (this.Power < firstcard.Power)
                                 this.Power = firstcard.Power;
                             found = 1;
@@ -45,6 +47,7 @@ namespace CoincheServer
                     }
                 }
             }
+            allCard.Clear();
             return (found);
         }
 
@@ -58,7 +61,7 @@ namespace CoincheServer
                 var duplicate = 0;
                 foreach (var secondcard in allCard)
                 {
-                    if (firstcard != secondcard)
+                    if (firstcard.Number != secondcard.Number && firstcard.Type != secondcard.Type)
                     {
                         if (firstcard.Number.Equals(secondcard.Number))
                             duplicate++;
@@ -71,6 +74,7 @@ namespace CoincheServer
                     }
                 }
             }
+            allCard.Clear();
             return (found);
         }
 
@@ -84,7 +88,7 @@ namespace CoincheServer
                 var duplicate = 0;
                 foreach (var secondcard in allCard)
                 {
-                    if (firstcard != secondcard)
+                    if (firstcard.Number != secondcard.Number && firstcard.Type != secondcard.Type)
                     {
                         if (firstcard.Number.Equals(secondcard.Number))
                             duplicate++;
