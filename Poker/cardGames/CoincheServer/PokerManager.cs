@@ -16,16 +16,17 @@ namespace CoincheServer
         private List<Card> _deck;
         private List<Card> _board;
         private List<Player> _players;
-        private bool _gameIsSetup;
+        public bool GameIsSetup { get; private set; }
 
         //GAME
-        private int _lilBlind;
-        private int _bigBlind;
-        private int _turn;
-        private int _played;
-        private int _currentlyPlaying;
-        private int _coinOnBoard;
-        private int _maxBet;
+
+        public int LilBlind { get; }
+        public int BigBlind { get; }
+        public int Turn { get; private set; }
+        public int Played { get; private set; }
+        public int CurrentlyPlaying { get; private set; }
+        public int CoinOnBoard { get; private set; }
+        public int MaxBet { get; private set; }
 
         public PokerManager()
         {
@@ -90,17 +91,17 @@ namespace CoincheServer
             _deck.Add(new Card('C', 'K', 12));
 
             _board = new List<Card>();
-            _gameIsSetup = false;
+            GameIsSetup = false;
 
             //SETUP IS OVER
 
-            _lilBlind = 5;
-            _bigBlind = 10;
-            _turn = 1;
-            _played = 0;
-            _currentlyPlaying = 1;
-            _coinOnBoard = 0;
-            _maxBet = 10;
+            LilBlind = 5;
+            BigBlind = 10;
+            Turn = 1;
+            Played = 0;
+            CurrentlyPlaying = 1;
+            CoinOnBoard = 0;
+            MaxBet = 10;
         }
 
         public static void Shuffle<T>(IList<T> list)
@@ -143,18 +144,18 @@ namespace CoincheServer
                 j++;
             }
             ResetPlayer();
-            _coinOnBoard = 0;
-            _maxBet = 10;
-            _currentlyPlaying = 1;
-            _players[_currentlyPlaying - 1].Coin -= 5;
+            CoinOnBoard = 0;
+            MaxBet = 10;
+            CurrentlyPlaying = 1;
+            _players[CurrentlyPlaying - 1].Coin -= 5;
             _players[NextPlayer() - 1].Coin -= 10;
-            _coinOnBoard += 15;
-            _gameIsSetup = true;
+            CoinOnBoard += 15;
+            GameIsSetup = true;
         }
 
         public string LaunchPoker(string msg, string channelId)
         {
-            if (_gameIsSetup == false)
+            if (GameIsSetup == false)
                 SetupGame();
             if (string.Equals(msg, "BOARD"))
                 return (AffBoard());
@@ -170,33 +171,33 @@ namespace CoincheServer
             {
                 if (string.Equals(msg, "PASS"))
                 {
-                    var current = _currentlyPlaying;
+                    var current = CurrentlyPlaying;
 
-                    _players[_currentlyPlaying - 1].HasPassed = true;
+                    _players[CurrentlyPlaying - 1].HasPassed = true;
                     RotatePlayer();
                     if (PlayerInGame() == 1)
                     {
-                        _played = 0;
-                        _turn += 1;
+                        Played = 0;
+                        Turn += 1;
                         var winner = CheckLastPlayer();
-                        _turn = 1;
+                        Turn = 1;
                         SetupGame();
                         return ("ACTION: Player " + current + " passed " + "\nWinner is " + winner +
                                 "\nNew round just started" + "\r\n");
                     }
-                    if (_played == PlayerInGame())
+                    if (Played == PlayerInGame())
                     {
-                        _played = 0;
-                        _turn += 1;
-                        if (_turn > 3)
+                        Played = 0;
+                        Turn += 1;
+                        if (Turn > 3)
                         {
                             var winner = CheckWinner();
-                            _turn = 1;
+                            Turn = 1;
                             SetupGame();
                             return ("ACTION: Player " + current + " passed " + "\n" + winner +
                                     "\nNew round just started" + "\r\n");
                         }
-                        return ("ACTION: Player " + current + " passed. Starting turn " + _turn + "\r\n");
+                        return ("ACTION: Player " + current + " passed. Starting turn " + Turn + "\r\n");
                     }
                     return ("ACTION: Player " + current + " passed\r\n");
                 }
@@ -204,7 +205,7 @@ namespace CoincheServer
                     return (CheckBet(msg, channelId));
             }
             else
-                return ("INFO: Sorry this is not your turn player " + _currentlyPlaying +
+                return ("INFO: Sorry this is not your turn player " + CurrentlyPlaying +
                         " is currently playing\r\n");
             return ("INFO: THE GAME IS HERE\r\n");
         }
@@ -223,28 +224,28 @@ namespace CoincheServer
                 betValue += msg[i];
                 i++;
             }
-            if (int.Parse(betValue) >= _maxBet && GetPlayerById(chanId).Coin >= int.Parse((betValue)))
+            if (int.Parse(betValue) >= MaxBet && GetPlayerById(chanId).Coin >= int.Parse((betValue)))
             {
-                var current = _currentlyPlaying;
+                var current = CurrentlyPlaying;
 
                 GetPlayerById(chanId).Coin -= int.Parse(betValue);
-                _coinOnBoard += int.Parse(betValue);
-                _maxBet = int.Parse(betValue);
+                CoinOnBoard += int.Parse(betValue);
+                MaxBet = int.Parse(betValue);
                 RotatePlayer();
-                _played += 1;
-                if (_played == PlayerInGame())
+                Played += 1;
+                if (Played == PlayerInGame())
                 {
-                    _turn += 1;
-                    _played = 0;
-                    if (_turn > 3)
+                    Turn += 1;
+                    Played = 0;
+                    if (Turn > 3)
                     {
                         var winner = CheckWinner();
-                        _turn = 1;
+                        Turn = 1;
                         SetupGame();
                         return ("ACTION: Player " + current + " bet value " + betValue + "\n" + winner + "\nNew round just started" + "\r\n");
                     }
 
-                    return ("ACTION: Player " + current + " bet value " + betValue + ". Starting turn " + _turn +
+                    return ("ACTION: Player " + current + " bet value " + betValue + ". Starting turn " + Turn +
                             "\r\n");
                 }
                 return ("ACTION: Player " + current + " bet value " + betValue + "\r\n");
@@ -283,7 +284,7 @@ namespace CoincheServer
             var boardInfo = "";
             var i = 0;
 
-            while (i != (2 + _turn))
+            while (i != (2 + Turn))
             {
                 boardInfo += _board[i].Type.ToString() + _board[i].Number.ToString() + " ";
                 i++;
@@ -293,16 +294,16 @@ namespace CoincheServer
 
         public int NextPlayer()
         {
-            if (_currentlyPlaying + 1 == Player)
+            if (CurrentlyPlaying + 1 == Player)
                 return (1);
-            return (_currentlyPlaying + 1);
+            return (CurrentlyPlaying + 1);
         }
 
         public bool CurrentPlayerIsGood(string chanId)
         {
             foreach (var p in _players)
             {
-                if (p.PlayerNbr == _currentlyPlaying && string.Equals(p.ChannelId, chanId))
+                if (p.PlayerNbr == CurrentlyPlaying && string.Equals(p.ChannelId, chanId))
                     return (true);
             }
             return (false);
@@ -310,18 +311,18 @@ namespace CoincheServer
 
         public void RotatePlayer()
         {
-            if (_currentlyPlaying == _players.Count)
-                _currentlyPlaying = 1;
+            if (CurrentlyPlaying == _players.Count)
+                CurrentlyPlaying = 1;
             else
-                _currentlyPlaying++;
+                CurrentlyPlaying++;
 
-            if (_players[_currentlyPlaying - 1].HasPassed != true  && _players[_currentlyPlaying - 1].HasPassed == true) return;
-            while (_players[_currentlyPlaying - 1].HasPassed == true || _players[_currentlyPlaying - 1].Lost == true)
+            if (_players[CurrentlyPlaying - 1].HasPassed != true  && _players[CurrentlyPlaying - 1].HasPassed == true) return;
+            while (_players[CurrentlyPlaying - 1].HasPassed == true || _players[CurrentlyPlaying - 1].Lost == true)
             {
-                if (_currentlyPlaying == _players.Count)
-                    _currentlyPlaying = 1;
+                if (CurrentlyPlaying == _players.Count)
+                    CurrentlyPlaying = 1;
                 else
-                    _currentlyPlaying++;
+                    CurrentlyPlaying++;
             }
         }
 
@@ -351,8 +352,8 @@ namespace CoincheServer
                 }
                     
             }
-            winner.Coin += _coinOnBoard;
-            return ("And the winner for " + _coinOnBoard + " is player " + currentWinner + "\r\n");
+            winner.Coin += CoinOnBoard;
+            return ("And the winner for " + CoinOnBoard + " is player " + currentWinner + "\r\n");
         }
 
         public Player GetPlayerById(string chanId)
@@ -397,12 +398,12 @@ namespace CoincheServer
 
         public string AffMaxBet()
         {
-            return ("INFO: The current maximum bet is " + _maxBet + "\r\n");
+            return ("INFO: The current maximum bet is " + MaxBet + "\r\n");
         }
 
         public string AffCoinOnBoard()
         {
-            return ("INFO: The number of coin on board is " + _coinOnBoard + "\r\n");
+            return ("INFO: The number of coin on board is " + CoinOnBoard + "\r\n");
         }
 
         public bool IsGameStarted { get; set; }

@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CoincheServer
 {
-    class Card
+    public class Card
     {
         public Card(char t, char n, int p)
         {
-            this.Type = t;
-            this.Number = n;
-            this.Power = p;
+            Type = t;
+            Number = n;
+            Power = p;
         }
 
         public char Type { get; set; }

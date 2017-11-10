@@ -8,7 +8,7 @@ namespace CoincheServer
     using DotNetty.Transport.Channels;
     using DotNetty.Transport.Channels.Groups;
 
-    public class TelnetServerHandler : SimpleChannelInboundHandler<string>
+    public class ServerHandler : SimpleChannelInboundHandler<string>
     {
         static volatile IChannelGroup group;
         static volatile PokerManager poker = new PokerManager();

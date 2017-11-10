@@ -24,7 +24,7 @@ namespace CoincheServer
 
             var STRING_ENCODER = new StringEncoder();
             var STRING_DECODER = new StringDecoder();
-            var SERVER_HANDLER = new TelnetServerHandler();
+            var SERVER_HANDLER = new ServerHandler();
 
             try
             {

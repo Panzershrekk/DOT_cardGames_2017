@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoincheClient", "cardGames\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoincheServer", "CoincheServer\CoincheServer.csproj", "{9549BFEA-5839-404E-A442-35B4D13BC07D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{D08AB916-B8A1-43C5-9CAF-71BAB63FA01A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9549BFEA-5839-404E-A442-35B4D13BC07D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9549BFEA-5839-404E-A442-35B4D13BC07D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9549BFEA-5839-404E-A442-35B4D13BC07D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D08AB916-B8A1-43C5-9CAF-71BAB63FA01A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D08AB916-B8A1-43C5-9CAF-71BAB63FA01A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D08AB916-B8A1-43C5-9CAF-71BAB63FA01A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D08AB916-B8A1-43C5-9CAF-71BAB63FA01A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
