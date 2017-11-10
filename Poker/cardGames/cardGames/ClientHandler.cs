@@ -1,8 +1,8 @@
-﻿namespace CoincheClient
-{
-    using System;
-    using DotNetty.Transport.Channels;
+﻿using System;
+using DotNetty.Transport.Channels;
 
+namespace cardGames
+{
     public class TelnetClientHandler : SimpleChannelInboundHandler<string>
     {
         protected override void ChannelRead0(IChannelHandlerContext contex, string msg)

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace CoincheServer
 {
@@ -9,12 +7,12 @@ namespace CoincheServer
     {
         public Player(int pn, string channel)
         {
-            this.PlayerNbr = pn;
-            this.ChannelId = channel;
-            this.Hand = new List<Card>();
-            this.Coin = 1500;
-            this.HasPassed = false;
-            this.Lost = false;
+            PlayerNbr = pn;
+            ChannelId = channel;
+            Hand = new List<Card>();
+            Coin = 1500;
+            HasPassed = false;
+            Lost = false;
         }
 
         public int Coin { get; set; }
@@ -32,17 +30,17 @@ namespace CoincheServer
 
         public void AddCard(Card c)
         {
-           this.Hand.Add(c);
+           Hand.Add(c);
         }
 
         public void ClearHand()
         {
-            this.Hand.Clear();
+            Hand.Clear();
         }
 
         public string RetHand()
         {
-            var cards = this.Hand.Aggregate("", (current, c) => current + (c.Type.ToString() + c.Number.ToString() + " "));
+            var cards = Hand.Aggregate("", (current, c) => current + (c.Type.ToString() + c.Number.ToString() + " "));
 
             return (cards);
         }

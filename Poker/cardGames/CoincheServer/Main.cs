@@ -1,14 +1,9 @@
-﻿using System;
-
-namespace CoincheServer
+﻿namespace CoincheServer
 {
     using System;
-    using System.IO;
-    using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
     using DotNetty.Codecs;
     using DotNetty.Handlers.Logging;
-    using DotNetty.Handlers.Tls;
     using DotNetty.Transport.Bootstrapping;
     using DotNetty.Transport.Channels;
     using DotNetty.Transport.Channels.Sockets;
@@ -22,9 +17,9 @@ namespace CoincheServer
             var bossGroup = new MultithreadEventLoopGroup(1);
             var workerGroup = new MultithreadEventLoopGroup();
 
-            var STRING_ENCODER = new StringEncoder();
-            var STRING_DECODER = new StringDecoder();
-            var SERVER_HANDLER = new ServerHandler();
+            var stringEncoder = new StringEncoder();
+            var stringDecoder = new StringDecoder();
+            var serverHandler = new ServerHandler();
 
             try
             {
@@ -39,7 +34,7 @@ namespace CoincheServer
                         IChannelPipeline pipeline = channel.Pipeline;
 
                         pipeline.AddLast(new DelimiterBasedFrameDecoder(8192, Delimiters.LineDelimiter()));
-                        pipeline.AddLast(STRING_ENCODER, STRING_DECODER, SERVER_HANDLER);
+                        pipeline.AddLast(stringEncoder, stringDecoder, serverHandler);
                     }));
 
                 IChannel bootstrapChannel = await bootstrap.BindAsync(ServerSettings.Port);

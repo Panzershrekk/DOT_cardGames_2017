@@ -1,7 +1,7 @@
-﻿namespace CoincheClient
-{
-    using System.Net;
+﻿using System.Net;
 
+namespace cardGames
+{
     public class ClientSettings
     {
         public static IPAddress Host => IPAddress.Parse("127.0.0.1");

@@ -1,17 +1,13 @@
-﻿namespace CoincheClient
-{
-    using System;
-    using System.IO;
-    using System.Net;
-    using System.Net.Security;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Threading.Tasks;
-    using DotNetty.Codecs;
-    using DotNetty.Handlers.Tls;
-    using DotNetty.Transport.Bootstrapping;
-    using DotNetty.Transport.Channels;
-    using DotNetty.Transport.Channels.Sockets;
+﻿using System;
+using System.Net;
+using System.Threading.Tasks;
+using DotNetty.Codecs;
+using DotNetty.Transport.Bootstrapping;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
 
+namespace cardGames
+{
     class Program
     {
         static async Task RunClientAsync()
@@ -19,7 +15,6 @@
 
             var group = new MultithreadEventLoopGroup();
 
-            string targetHost = null;
             try
             {
                 var bootstrap = new Bootstrap();
@@ -51,6 +46,7 @@
                     }
                     catch
                     {
+                        // ignored
                     }
                     if (string.Equals(line, "bye", StringComparison.OrdinalIgnoreCase))
                     {

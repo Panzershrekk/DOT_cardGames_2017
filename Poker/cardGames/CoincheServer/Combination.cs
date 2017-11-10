@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CoincheServer
 {
@@ -12,7 +8,7 @@ namespace CoincheServer
     {
         public Combination()
         {
-            this.Power = 0;
+            Power = 0;
         }
 
         public int CheckAllComb(List<Card> board, List<Card> playerHand)
@@ -53,8 +49,8 @@ namespace CoincheServer
                     {
                         if (firstcard.Number == secondcard.Number)
                         {
-                            if (this.Power < firstcard.Power)
-                                this.Power = firstcard.Power;
+                            if (Power < firstcard.Power)
+                                Power = firstcard.Power;
                             found = 1;
                         }
                     }
@@ -147,14 +143,14 @@ namespace CoincheServer
             var cardIt = 0;
             var allCard = new List<Card>(board);
             allCard.AddRange(new List<Card>(playerHand));
-            List<Card> SortedList = allCard.OrderBy(o => o.Power).ToList();
-            SortedList.AddRange(SortedList);
+            List<Card> sortedList = allCard.OrderBy(o => o.Power).ToList();
+            sortedList.AddRange(sortedList);
             while (cardIt != 7)
             {
-                if (SortedList[cardIt + 1].Power == SortedList[cardIt].Power + 1 &&
-                    SortedList[cardIt + 2].Power == SortedList[cardIt].Power + 2 &&
-                    SortedList[cardIt + 3].Power == SortedList[cardIt].Power + 3 &&
-                    SortedList[cardIt + 4].Power == SortedList[cardIt].Power + 4)
+                if (sortedList[cardIt + 1].Power == sortedList[cardIt].Power + 1 &&
+                    sortedList[cardIt + 2].Power == sortedList[cardIt].Power + 2 &&
+                    sortedList[cardIt + 3].Power == sortedList[cardIt].Power + 3 &&
+                    sortedList[cardIt + 4].Power == sortedList[cardIt].Power + 4)
                 {
                     found = 4;
                     Power = 4;
@@ -209,8 +205,8 @@ namespace CoincheServer
                             duplicate++;
                         if (duplicate == 3)
                         {
-                            if (this.Power < firstcard.Power)
-                                this.Power = firstcard.Power;
+                            if (Power < firstcard.Power)
+                                Power = firstcard.Power;
                             found = 7;
                         }
                     }
@@ -225,19 +221,19 @@ namespace CoincheServer
             var cardIt = 0;
             var allCard = new List<Card>(board);
             allCard.AddRange(new List<Card>(playerHand));
-            List<Card> SortedList = allCard.OrderBy(o => o.Power).ToList();
-            SortedList.AddRange(SortedList);
+            List<Card> sortedList = allCard.OrderBy(o => o.Power).ToList();
+            sortedList.AddRange(sortedList);
             while (cardIt != 3)
             {
-                if (SortedList[cardIt].Power == 9 &&
-                    SortedList[cardIt + 1].Power == 10 &&
-                    SortedList[cardIt + 2].Power == 11 &&
-                    SortedList[cardIt + 3].Power == 12 &&
-                    SortedList[cardIt + 4].Power == 13 &&
-                    SortedList[cardIt + 1].Type == SortedList[cardIt].Type &&
-                    SortedList[cardIt + 2].Type == SortedList[cardIt].Type &&
-                    SortedList[cardIt + 3].Type == SortedList[cardIt].Type &&
-                    SortedList[cardIt + 4].Type == SortedList[cardIt].Type)
+                if (sortedList[cardIt].Power == 9 &&
+                    sortedList[cardIt + 1].Power == 10 &&
+                    sortedList[cardIt + 2].Power == 11 &&
+                    sortedList[cardIt + 3].Power == 12 &&
+                    sortedList[cardIt + 4].Power == 13 &&
+                    sortedList[cardIt + 1].Type == sortedList[cardIt].Type &&
+                    sortedList[cardIt + 2].Type == sortedList[cardIt].Type &&
+                    sortedList[cardIt + 3].Type == sortedList[cardIt].Type &&
+                    sortedList[cardIt + 4].Type == sortedList[cardIt].Type)
                 {
                     found = 9000;
                     Power = 9000;
