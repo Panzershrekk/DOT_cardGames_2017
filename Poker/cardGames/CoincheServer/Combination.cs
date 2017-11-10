@@ -38,7 +38,7 @@ namespace CoincheServer
                 return (1);
             return (0);
         }
-        
+
         public int CheckPair(List<Card> board, List<Card> playerHand)
         {
             var found = 0;
