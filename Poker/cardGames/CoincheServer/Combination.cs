@@ -19,6 +19,9 @@ namespace CoincheServer
         {
             Console.WriteLine("---------------newwwwwwww---------------");
             Power = 0;
+
+            if (CheckRoyalFlush(board, playerHand) != 0)
+                return (9000);
             if (CheckFourOfAKind(board, playerHand) != 0)
                 return (7);
             if (CheckFull(board, playerHand) != 0)
@@ -141,12 +144,22 @@ namespace CoincheServer
         public int CheckStraight(List<Card> board, List<Card> playerHand) // Suite
         {
             var found = 0;
+            var cardIt = 0;
             var allCard = new List<Card>(board);
             allCard.AddRange(new List<Card>(playerHand));
             List<Card> SortedList = allCard.OrderBy(o => o.Power).ToList();
-            foreach (var c in SortedList)
+            SortedList.AddRange(SortedList);
+            while (cardIt != 7)
             {
-                c.Info();
+                if (SortedList[cardIt + 1].Power == SortedList[cardIt].Power + 1 &&
+                    SortedList[cardIt + 2].Power == SortedList[cardIt].Power + 2 &&
+                    SortedList[cardIt + 3].Power == SortedList[cardIt].Power + 3 &&
+                    SortedList[cardIt + 4].Power == SortedList[cardIt].Power + 4)
+                {
+                    found = 4;
+                    Power = 4;
+                }
+                cardIt++;
             }
             return (found);
         }
@@ -205,7 +218,35 @@ namespace CoincheServer
             }
             return (found);
         }
-        
+
+        public int CheckRoyalFlush(List<Card> board, List<Card> playerHand)
+        {
+            var found = 0;
+            var cardIt = 0;
+            var allCard = new List<Card>(board);
+            allCard.AddRange(new List<Card>(playerHand));
+            List<Card> SortedList = allCard.OrderBy(o => o.Power).ToList();
+            SortedList.AddRange(SortedList);
+            while (cardIt != 3)
+            {
+                if (SortedList[cardIt].Power == 9 &&
+                    SortedList[cardIt + 1].Power == 10 &&
+                    SortedList[cardIt + 2].Power == 11 &&
+                    SortedList[cardIt + 3].Power == 12 &&
+                    SortedList[cardIt + 4].Power == 13 &&
+                    SortedList[cardIt + 1].Type == SortedList[cardIt].Type &&
+                    SortedList[cardIt + 2].Type == SortedList[cardIt].Type &&
+                    SortedList[cardIt + 3].Type == SortedList[cardIt].Type &&
+                    SortedList[cardIt + 4].Type == SortedList[cardIt].Type)
+                {
+                    found = 9000;
+                    Power = 9000;
+                }
+                cardIt++;
+            }
+            return (found);
+        }
+
         public int Power { get; set; }
     }
 }

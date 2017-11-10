@@ -121,5 +121,43 @@ namespace UnitTest
             int res = comb.CheckDoublePair(test, test2);
             Assert.AreNotEqual(0, res);
         }
+
+        [TestMethod]
+        public void CombinationTestWhenStraight()
+        {
+            Combination comb = new Combination();
+            List<Card> test = new List<Card>();
+            test.Add(new Card('S', '2', 1));
+            test.Add(new Card('H', '3', 2));
+            test.Add(new Card('C', '4', 3));
+            test.Add(new Card('D', '5', 4));
+            test.Add(new Card('H', '6', 5));
+
+            List<Card> test2 = new List<Card>();
+            test2.Add(new Card('H', '8', 7));
+            test2.Add(new Card('S', 'K', 12));
+
+            int res = comb.CheckStraight(test, test2);
+            Assert.AreNotEqual(0, res);
+        }
+
+        [TestMethod]
+        public void CombinationTestWhenRoyalFLush()
+        {
+            Combination comb = new Combination();
+            List<Card> test = new List<Card>();
+            test.Add(new Card('H', 'X', 9));
+            test.Add(new Card('H', 'J', 10));
+            test.Add(new Card('H', 'Q', 11));
+            test.Add(new Card('H', 'K', 12));
+            test.Add(new Card('H', '1', 13));
+
+            List<Card> test2 = new List<Card>();
+            test2.Add(new Card('H', '8', 7));
+            test2.Add(new Card('S', '2', 1));
+
+            int res = comb.CheckRoyalFlush(test, test2);
+            Assert.AreNotEqual(0, res);
+        }
     }
 }

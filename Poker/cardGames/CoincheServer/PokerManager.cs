@@ -340,7 +340,7 @@ namespace CoincheServer
                 {
                     var power = 0;
                     power = comb.CheckAllComb(_board, p.Hand);
-                    //Console.WriteLine("Power for player " + p.PlayerNbr + " is " + power + " and his most powerfull card is " + comb.Power);
+                    Console.WriteLine("Power for player " + p.PlayerNbr + " is " + power + " and his most powerfull card is " + comb.Power);
             
                     if (power >= 0 && maxPower <= power && maxpowerCard < comb.Power)
                     {
