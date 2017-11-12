@@ -135,6 +135,8 @@ namespace CoincheServer
                 {
                     Players[j - 1]
                         .AddCard(new Card(Deck[i].Type, Deck[i].Number, Deck[i].Power));
+                    if (Players[j - 1].Coin <= 0)
+                        Players[j - 1].Lost = true;
                     i++;
                 }
                 j++;
@@ -190,6 +192,8 @@ namespace CoincheServer
                             var winner = CheckWinner();
                             Turn = 1;
                             SetupGame();
+                            if (PlayerLost() == 1)
+                                return ("ACTION: player " + winner + " won the game\r\n");
                             return ("ACTION: Player " + current + " passed " + "\n" + winner +
                                     "\nNew round just started" + "\r\n");
                         }
@@ -197,16 +201,46 @@ namespace CoincheServer
                     }
                     return ("ACTION: Player " + current + " passed\r\n");
                 }
+                if (msg.Equals("BETALL"))
+                    return (BetAll(msg, channelId));
                 if (msg.StartsWith("BET") && msg.Length >= 4 &&  msg.Length <= 8)
                     return (CheckBet(msg, channelId));
             }
             else
                 return ("INFO: Sorry this is not your turn player " + CurrentlyPlaying +
                         " is currently playing\r\n");
-            return ("INFO: THE GAME IS HERE\r\n");
+            return ("INFO: The command was not recognized\r\n");
         }
 
-        
+        public string BetAll(string msg, string chanId)
+        {
+                var current = CurrentlyPlaying;
+            var betValue = GetPlayerById(chanId).Coin;
+
+                GetPlayerById(chanId).Coin -= betValue;
+                CoinOnBoard += betValue;
+                MaxBet = betValue;
+                RotatePlayer();
+                Played += 1;
+                if (Played == PlayerInGame())
+                {
+                    Turn += 1;
+                    Played = 0;
+                    if (Turn > 3)
+                    {
+                        var winner = CheckWinner();
+                        Turn = 1;
+                        SetupGame();
+                        if (PlayerLost() == 1)
+                            return ("ACTION: player " + winner + " won the game\r\n");
+                        return ("ACTION: Player " + current + " bet value " + betValue + "\n" + winner + "\nNew round just started" + "\r\n");
+                    }
+
+                    return ("ACTION: Player " + current + " bet value " + betValue + ". Starting turn " + Turn +
+                            "\r\n");
+                }
+                return ("ACTION: Player " + current + " bet value " + betValue + "\r\n");
+        }
 
         public string CheckBet(string msg, string chanId)
         {
@@ -367,7 +401,19 @@ namespace CoincheServer
 
             foreach (var p in Players)
             {
-                if (p.HasPassed == false)
+                if (p.HasPassed == false || p.Lost == false)
+                    i++;
+            }
+            return (i);
+        }
+
+        public int PlayerLost()
+        {
+            int i = 0;
+
+            foreach (var p in Players)
+            {
+                if (p.Lost == false)
                     i++;
             }
             return (i);
